@@ -57,7 +57,6 @@ import com.amplifyframework.predictions.models.LanguageType
 typealias LumaListener = (luma: Double) -> Unit
 
 class MainActivity : AppCompatActivity() {
-    private val myApp: MyAmplifyApp? = null
     private var imageCapture: ImageCapture? = null
 
     private lateinit var outputDirectory: File
@@ -67,7 +66,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 //        val myApp = this.application as MyAmplifyApp
-/*
         // amplify初期化
         try {
 //            Amplify.addPlugin(AWSDataStorePlugin())
@@ -79,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         } catch (error: AmplifyException) {
             Log.e(TAG, "Could not initialize Amplify", error)
         }
-  */
+
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
@@ -139,14 +137,9 @@ class MainActivity : AppCompatActivity() {
                     // val imageUriString: String? = savedUri.getPath()
                     Log.d(TAG, imageUriString.toString())
                     val imageBit: Bitmap = BitmapFactory.decodeFile(imageUriString)
-                    if (myApp != null) {
-                        myApp.detectText(imageBit)
-                    } else {
-                        Log.d(TAG, "動いてない")
-                    }
 
+                    detectText(imageBit) // predictionsを利用
                 }
-
             })
         /*
         // 画像のbit化
@@ -156,7 +149,16 @@ class MainActivity : AppCompatActivity() {
         val imageBytes: ByteArray = byteArrayOutputStream.toByteArray()
         val imageString: String = Base64.encodeToString(imageBytes, Base64.DEFAULT)
          */
-
+    }
+    fun detectText(image: Bitmap) {
+        Amplify.Predictions.identify(
+            TextFormatType.PLAIN, image,
+            { result ->
+                val identifyResult = result as IdentifyTextResult
+                Log.i("MyAmplifyApp", "${identifyResult?.fullText}")
+            },
+            { Log.e("MyAmplifyApp", "Identify text failed", it) }
+        )
     }
 
     private fun startCamera() {
