@@ -18,25 +18,6 @@ import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
-import android.media.MediaPlayer
-
-import com.amazonaws.services.rekognition.model.TextDetection
-import com.amazonaws.services.rekognition.model.DetectTextResult
-import com.amazonaws.services.rekognition.model.DetectTextRequest
-import com.amazonaws.services.rekognition.AmazonRekognition
-
-// ここわからん
-/*
-import com.amazonaws.services.rekognition.AmazonRekognitionClientBuilder
-import com.amazonaws.services.rekognition.model.AmazonRekognitionException
-import com.amazonaws.services.rekognition.AmazonRekognitionClient
-import com.amazonaws.AmazonClientException
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
- */
-
-import com.amazonaws.services.rekognition.model.Image
-import com.amazonaws.util.IOUtils
 
 // 画像をBitmapからBase64エンコードするために使う
 import android.graphics.Bitmap
@@ -51,7 +32,6 @@ import com.amplifyframework.api.aws.AWSApiPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.predictions.PredictionsCategory
 import com.amplifyframework.predictions.aws.AWSPredictionsPlugin
-import com.amplifyframework.predictions.models.LanguageType
 
 
 typealias LumaListener = (luma: Double) -> Unit
@@ -65,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        val myApp = this.application as MyAmplifyApp
+
         // amplify初期化
         try {
 //            Amplify.addPlugin(AWSDataStorePlugin())
@@ -124,12 +104,6 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
 
-                    /*
-                    // 画像のuriを文字列に変換し、先頭からfile://を削除する
-                    val imageUri: String = savedUri.toString().removePrefix("file://")
-                    Log.d(TAG, imageUri)
-                    */
-
                     // 画像をbitmapへ
                     // Fileスキームからパスを取得
                     val imageUriString: String? = photoFile.path
@@ -141,14 +115,6 @@ class MainActivity : AppCompatActivity() {
                     detectText(imageBit) // predictionsを利用
                 }
             })
-        /*
-        // 画像のbit化
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.image)
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-        val imageBytes: ByteArray = byteArrayOutputStream.toByteArray()
-        val imageString: String = Base64.encodeToString(imageBytes, Base64.DEFAULT)
-         */
     }
     fun detectText(image: Bitmap) {
         Amplify.Predictions.identify(
@@ -232,53 +198,4 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
-/*
-    // amplify利用
-    fun detectText(image: Bitmap) {
-        Amplify.Predictions.identify(
-            TextFormatType.PLAIN, image,
-            { result ->
-                val identifyResult = result as IdentifyTextResult
-                Log.i("MyAmplifyApp", "${identifyResult?.fullText}")
-            },
-            { Log.e("MyAmplifyApp", "Identify text failed", it) }
-        )
-    }
-
- */
-/*
-    object DetectLabelsLocalFile {
-        @Throws(java.lang.Exception::class)
-        @JvmStatic
-        fun main(args: Array<String>) {
-            val photo = "input.jpg"
-            var imageBytes: ByteBuffer?
-            FileInputStream(File(photo)).use { inputStream ->
-                imageBytes =
-                    ByteBuffer.wrap(IOUtils.toByteArray(inputStream))
-            }
-            val credential: AWSCredentials = ProfileCredentialsProvider("default").getCredentials()
-            // val rekognitionClient: AmazonRekognition = AmazonRekognitionClientBuilder.standard()
-            val rekognitionClient: AmazonRekognition = AmazonRekognitionClient(credential);
-            val request = DetectLabelsRequest()
-                .withImage(
-                    Image()
-                        .withBytes(imageBytes)
-                )
-                .withMaxLabels(10)
-                .withMinConfidence(77f)
-            try {
-                val result = rekognitionClient.detectLabels(request)
-                val labels = result.labels
-                println("Detected labels for $photo")
-                for (label in labels) {
-                    println(label.name + ": " + label.confidence.toString())
-                }
-            } catch (e: AmazonRekognitionException) {
-                e.printStackTrace()
-            }
-        }
-    }
-
- */
 }
